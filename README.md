@@ -18,4 +18,6 @@ pip install -r requirements.txt
 ```bash
 streamlit run wacc_app.py
 ```
+Se, ao chamar o streamlit, chegar uma mensagem pedindo seu e-mail, ignore e aperte Enter
+
 A aplicação abrirá automaticamente no navegador, normalmente em http://localhost:8501.
