@@ -10,10 +10,12 @@ Assim, o código funciona como uma ferramenta completa de análise financeira, c
 Siga os passos abaixo para executar a aplicação localmente:
 
 1. Instale as dependências do projeto
+```bash
 pip install -r requirements.txt
-
+```
 
 2. Execute a aplicação Streamlit
+```bash
 streamlit run wacc_app.py
-
+```
 A aplicação abrirá automaticamente no navegador, normalmente em http://localhost:8501.
