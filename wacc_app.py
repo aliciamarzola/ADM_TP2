@@ -3,10 +3,10 @@ import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 
-# Configuração da página
-st.set_page_config(page_title="WACC Master Analyzer", layout="wide")
+# Configuração da Página
+st.set_page_config(page_title="Análise WACC", layout="wide")
 
-# --- LÓGICA FINANCEIRA ---
+# Funções de Cálculo
 
 def calcular_ke_capm(rf, beta, rm):
     """Calcula Custo do Equity (Ke) via CAPM."""
@@ -24,12 +24,12 @@ def hamada_relever_beta(beta_unlevered, D, E, T):
     """
     Re-alavanca o Beta baseada na estrutura de capital D/E.
     Fórmula de Hamada: Beta_L = Beta_U * [1 + (1-T)*(D/E)]
-    Isso é crucial: rE aumenta conforme a dívida aumenta!
+    rE aumenta conforme a dívida aumenta
     """
     if E == 0: return beta_unlevered # Evitar divisão por zero
     return beta_unlevered * (1 + (1 - T) * (D / E))
 
-# --- SIDEBAR: INPUTS ---
+# Inputs do Usuário via Sidebar
 st.sidebar.header("1. Estrutura de Capital Atual")
 D_input = st.sidebar.number_input("Dívida Total (D) - R$", value=500000.0, step=10000.0)
 E_input = st.sidebar.number_input("Equity / Valor de Mercado (E) - R$", value=1000000.0, step=10000.0)
@@ -52,14 +52,13 @@ else:
     rE_manual = st.sidebar.number_input("Custo do Equity Manual (rE) - %", value=12.0) / 100
     rE_final = rE_manual
 
-# --- CÁLCULOS PRINCIPAIS ---
+# Cálculo do WACC Atual
 wacc_atual = calcular_wacc(D_input, E_input, rD_input, rE_final, T_input)
 spread_economico = roic_input - wacc_atual
-eva = (D_input + E_input) * spread_economico # Economic Value Added
+eva = (D_input + E_input) * spread_economico # Valor Econômico Adicionado
 
-# --- DASHBOARD PRINCIPAL ---
-
-st.title("📊 Calculadora e Otimizador de WACC")
+# Layout Principal
+st.title("Calculadora e Otimizador de WACC")
 st.markdown("---")
 
 # Métricas no topo
@@ -69,28 +68,28 @@ col2.metric("Custo Equity (Ke)", f"{rE_final:.2%}")
 col3.metric("Custo Dívida Líquido (Kd)", f"{rD_input*(1-T_input):.2%}")
 col4.metric("Criação de Valor (Spread)", f"{spread_economico:.2%}", delta_color="normal" if spread_economico > 0 else "inverse")
 
-# --- ABA DE ANÁLISE ---
-tab1, tab2, tab3 = st.tabs(["💡 Consultor Inteligente", "📈 Simulação de Estrutura", "📋 Detalhes"])
+# Abas de Navegação
+tab1, tab2, tab3 = st.tabs(["Consultor Inteligente", "Simulação de Estrutura", "Detalhes"])
 
 with tab1:
     st.subheader("Diagnóstico do seu Negócio")
     
-    # Lógica de decisão (O "O que fazer")
+    # Lógica de decisão
     if spread_economico > 0.02:
-        st.success(f"✅ **Excelente!** Sua empresa cria valor real. O retorno ({roic_input:.1%}) supera o custo de capital ({wacc_atual:.1%}) com folga.")
+        st.success(f"**Excelente!** Sua empresa cria valor real. O retorno ({roic_input:.1%}) supera o custo de capital ({wacc_atual:.1%}) com folga.")
         st.markdown("**Recomendação:** Acelere investimentos em projetos similares. Você tem 'gordura' para tomar mais dívida se precisar expandir.")
     elif spread_economico > 0:
-        st.warning(f"⚠️ **Atenção:** Você cria valor, mas a margem é apertada ({spread_economico:.2%}).")
+        st.warning(f"**Atenção:** Você cria valor, mas a margem é apertada ({spread_economico:.2%}).")
         st.markdown("**Recomendação:** Foque em eficiência operacional para subir o ROIC ou tente renegociar dívidas para baixar o rD.")
     else:
-        st.error(f"🚨 **PERIGO:** Destruição de valor detectada. Cada real investido custa mais do que retorna.")
+        st.error(f"**PERIGO:** Destruição de valor detectada. Cada real investido custa mais do que retorna.")
         st.markdown("**Ação Imediata:** Pare novos investimentos. Considere vender ativos improdutivos ou aporte de capital para reduzir a dívida cara.")
 
     st.write(f"**Valor Econômico Adicionado (EVA):** R$ {eva:,.2f}")
 
 with tab2:
     st.subheader("Curva de Otimização: WACC vs Alavancagem")
-    st.markdown("Este gráfico simula o que aconteceria com seu WACC se você alterasse a proporção de dívida (D/E). Note que ao aumentar a dívida, o risco do acionista sobe (Beta aumenta), encarecendo o Equity.")
+    st.markdown("Este gráfico simula o que aconteceria com seu WACC se você alterasse a proporção de dívida (D/E). Ao aumentar a dívida, o risco do acionista sobe (Beta aumenta), encarecendo o Equity.")
     
     # Simulação Avançada com Hamada
     # 1. Desalavancar o Beta atual para achar o risco puro do negócio
@@ -114,7 +113,7 @@ with tab2:
             de_ratio = wd / we
             
         # Re-alavanca Beta (Hamada)
-        beta_relevered = hamada_relever_beta(beta_unlevered, wd*100, we*100, T_input) # simplificação usando pesos
+        beta_relevered = hamada_relever_beta(beta_unlevered, wd*100, we*100, T_input)
         
         # Novo Ke
         new_ke = rf_sim + beta_relevered * (rm_sim - rf_sim)
